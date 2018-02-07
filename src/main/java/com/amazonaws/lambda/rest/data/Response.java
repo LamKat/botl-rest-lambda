@@ -10,19 +10,62 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.MapType;
 import com.fasterxml.jackson.databind.type.SimpleType;
+/*
+ * POJO response item that serialises as a GeoJSON feature object
+ * 
+ * @see http://geojson.org/geojson-spec.html#feature-objects
+ */
+public class Response {	
+	private Map<String, Object> geometry;
+	private GeoJsonProp prop = new GeoJsonProp();
 
-public class Response {
-	public String address;
-	public String description;
-	public String url;
-	public Map<String, Object> geometry;
-	public String refrence;
-
-	@JsonProperty("Geometry")
+	@JsonProperty("geometry")
 	public Map<String, Object> getGeometry() {
 		return geometry;
 	}
 	
+	@JsonProperty("type")
+	public String getType() {
+		return "Feature";
+	}
+	
+	@JsonProperty("properties")
+	public GeoJsonProp getProp() {
+		return prop;
+	}
+	
+	
+	public static class GeoJsonProp {
+		private String address;
+		private String description;
+		private String url;
+		private String refrence;
+		
+		@JsonProperty("url")
+		public String getUrl() {
+			return url;
+		}
+
+		@JsonProperty("description")
+		public String getDescription() {
+			return description;
+		}
+
+		@JsonProperty("address")
+		public String getAddress() {
+			return address;
+		}
+		
+		@JsonProperty("refrence")
+		public String getRefrence() {
+			return refrence;
+		}
+	}
+	
+	/*
+	 * AWS lambda uses a JSON serialiser that doesn't like the @JsonRawValue tag. 
+	 * So we need to pull the valid json out of raw format -_-
+	 */
 	public Response setGeometry(String geometry) throws JsonParseException, JsonMappingException, IOException {
 		ObjectMapper mapper = new ObjectMapper();
         this.geometry =  mapper.readValue(geometry, 
@@ -32,43 +75,23 @@ public class Response {
 		return this;
 	}
 	
-	@JsonProperty("URL")
-	public String getUrl() {
-		return url;
-	}
-	
 	public Response setUrl(String url) {
-		this.url = url;
+		this.prop.url = url;
 		return this;
 	}
 	
-	@JsonProperty("Description")
-	public String getDescription() {
-		return description;
-	}
-
 	public Response setDescription(String description) {
-		this.description = description;
+		this.prop.description = description;
 		return this;
-	}
-	
-	@JsonProperty("Address")
-	public String getAddress() {
-		return address;
 	}
 
 	public Response setAddress(String address) {
-		this.address = address;
+		this.prop.address = address;
 		return this;
-	}
-	
-	@JsonProperty("Refrence")
-	public String getRefrence() {
-		return refrence;
 	}
 
 	public Response setRefrence(String refrence) {
-		this.refrence = refrence;
+		this.prop.refrence = refrence;
 		return this;
 	}
 }
