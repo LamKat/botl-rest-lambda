@@ -1,20 +1,27 @@
 package com.amazonaws.lambda.rest.data;
 
 public class Request {
-	private String longitude;
-	private String latitude;
+	private Double longitude;
+	private Double latitude;
+	private Double radius;
 	
-	public String getLongitude() {
+	public Double getLongitude() {
 		return longitude;
 	}
-	public void setLongitude(String longitude) {
+	public void setLongitude(Double longitude) {
 		this.longitude = longitude;
 	}
-	public String getLatitude() {
+	public Double getLatitude() {
 		return latitude;
 	}
-	public void setLatitude(String latitude) {
+	public void setLatitude(Double latitude) {
 		this.latitude = latitude;
+	}
+	public Double getRadius() {
+		return radius;
+	}
+	public void setRadius(Double radius) {
+		this.radius = radius;
 	}
 	
 	

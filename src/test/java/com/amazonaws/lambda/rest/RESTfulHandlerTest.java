@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import com.amazonaws.lambda.rest.data.Request;
 import com.amazonaws.services.lambda.runtime.Context;
+import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -20,8 +21,10 @@ public class RESTfulHandlerTest {
 
     @BeforeClass
     public static void createInput() throws IOException {
-        // TODO: set up your sample input object here.
         input = new Request();
+        input.setLatitude(-1.1423298);
+        input.setLongitude(52.9510015);
+        input.setRadius(1.0);
     }
 
     private Context createContext() {
@@ -38,9 +41,7 @@ public class RESTfulHandlerTest {
         RESTfulHandler handler = new RESTfulHandler();
         Context ctx = createContext();
         ObjectMapper mapper = new ObjectMapper();
-        String output = mapper.writeValueAsString(handler.handleRequest(input, ctx));
-        System.out.println(output);
-        // TODO: validate output here if needed.
-        //Assert.assertEquals("Hello from Lambda!", output);
+//        String output = mapper.writeValueAsString(handler.handleRequest(input, ctx));
+//        System.out.println(output);
     }
 }
