@@ -16,7 +16,9 @@ import com.fasterxml.jackson.databind.type.SimpleType;
  * @see http://geojson.org/geojson-spec.html#feature-objects
  */
 public class Response {	
+	@JsonProperty("geometry")
 	private Map<String, Object> geometry;
+	@JsonProperty("properties")
 	private GeoJsonProp prop = new GeoJsonProp();
 
 	@JsonProperty("geometry")
@@ -36,9 +38,13 @@ public class Response {
 	
 	
 	public static class GeoJsonProp {
+		@JsonProperty("address")
 		private String address;
+		@JsonProperty("description")
 		private String description;
+		@JsonProperty("url")
 		private String url;
+		@JsonProperty("refrence")
 		private String refrence;
 		
 		@JsonProperty("url")
