@@ -22,9 +22,46 @@ public class RESTfulHandler implements RequestHandler<Request, List<Response>> {
 	private static String username = System.getenv("BOTL_DATABASE_USERNAME");
 	private static String endpoint = System.getenv("BOTL_DATABASE_ENDPOINT");
 	private static String port = System.getenv("BOTL_DATABASE_PORT");
-	final static String QUERY = "SELECT Refrence, Address, Description, URL, ST_AsGeoJSON(Geometry) as Geom FROM applications " + 
-			"WHERE st_within(Geometry, envelope(linestring(point(?, ?), point(?, ?)))) " + 
-			"ORDER BY st_distance(point(?, ?), Geometry)";
+	final static String QUERY = "SELECT CONCAT('[', GROUP_CONCAT(CONCAT( '{\"Reference\": \"', "
+			+ "app.Refrence, '\", \"Description\": \"', app.Description, '\", \"URL\": \"', app.URL, "
+			+ "'\", \"Comments\": ', COALESCE( ( SELECT CONCAT('[', GROUP_CONCAT(CONCAT('{\"Name\": \"', "
+			+ "comm.Name, '\", \"Comment\": \"', comm.Comment, '\"}') SEPARATOR ', '), ']') FROM "
+			+ "comments comm WHERE comm.ApplicationFK = app.ApplicationID ) , 'null'), '}' ) "
+			+ "SEPARATOR ', '), ']' ) as Applications, ST_AsGeoJSON(app.Geometry) "
+			+ "as Geom FROM applications app WHERE st_within(app.Geometry, "
+			+ "envelope(linestring(point(?, ?), point(?, ?)))) GROUP BY "
+			+ "app.Geometry ORDER BY st_distance(point(?, ?), app.Geometry)";
+	
+	/*
+		SELECT 
+			CONCAT(
+				'[',
+				GROUP_CONCAT(CONCAT(
+								'{"Reference": "', 
+								app.Refrence,
+								'", "Description": "', 
+								app.Description, 
+								'", "URL": "', 
+								app.URL, 
+								'", "Comments": ', 
+								COALESCE(
+									(
+										SELECT CONCAT('[', GROUP_CONCAT(CONCAT('{"Name": "', comm.Name, '", "Comment": "', comm.Comment, '"}') SEPARATOR ', '), ']')
+										FROM comments comm
+										WHERE comm.ApplicationFK = app.ApplicationID
+									) , 'null'), 
+								'}'
+							) SEPARATOR ', '),
+				']'
+				) as Applications,
+			ST_AsGeoJSON(app.Geometry) as Geom
+		FROM applications app 
+		WHERE st_within(app.Geometry, envelope(linestring(point(?, ?), point(?, ?)))) 
+		GROUP BY app.Geometry
+		ORDER BY st_distance(point(?, ?), app.Geometry)
+	 * 
+	 */
+	
 	
 	
     @Override
@@ -79,7 +116,7 @@ public class RESTfulHandler implements RequestHandler<Request, List<Response>> {
 		    ResultSet rs = ps.executeQuery();
 		    
 		    while (rs.next()) {
-				data.add(buildResponse(rs));
+				data.add(new Response(rs.getString("Applications"), rs.getString("Geom")));
 			}
 			//context.getLogger().log("Successfully executed query.  Result: " + currentTime);
 		}catch (SQLException e) {
@@ -93,17 +130,6 @@ public class RESTfulHandler implements RequestHandler<Request, List<Response>> {
 		return data;
 
 	}
-
-    
-    private Response buildResponse(ResultSet rs) throws SQLException, IOException {
-    	return (new Response())
-    			.setRefrence(rs.getString("Refrence"))
-	    		.setAddress(rs.getString("Address"))
-	    		.setDescription(rs.getString("Description"))
-	    		.setUrl(rs.getString("URL"))
-	    		.setGeometry(rs.getString("Geom"));
-	}
-
 
 	private static Predicate<Double> rangeInclusive(Double min, Double max) {
     	return (val -> val >= -90.0 && val <= 90.0);

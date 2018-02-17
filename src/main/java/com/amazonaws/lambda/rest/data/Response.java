@@ -2,10 +2,12 @@ package com.amazonaws.lambda.rest.data;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.MapType;
@@ -19,8 +21,16 @@ public class Response {
 	@JsonProperty("geometry")
 	private Map<String, Object> geometry;
 	@JsonProperty("properties")
-	private GeoJsonProp prop = new GeoJsonProp();
+	private GeoJsonProp properties = new GeoJsonProp();
 
+	public Response(String applications, String geometry ) throws IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		this.geometry = mapper.readValue(geometry, 
+				new TypeReference<Map<String,Object>>() {});
+		this.properties.applications = mapper.readValue(applications, 
+				new TypeReference<List<Map<String,Object>>>() {});
+	}
+	
 	@JsonProperty("geometry")
 	public Map<String, Object> getGeometry() {
 		return geometry;
@@ -32,39 +42,19 @@ public class Response {
 	}
 	
 	@JsonProperty("properties")
-	public GeoJsonProp getProp() {
-		return prop;
+	public GeoJsonProp getProperties() {
+		return properties;
 	}
 	
 	
+	
+	
 	public static class GeoJsonProp {
-		@JsonProperty("address")
-		private String address;
-		@JsonProperty("description")
-		private String description;
-		@JsonProperty("url")
-		private String url;
-		@JsonProperty("refrence")
-		private String refrence;
-		
-		@JsonProperty("url")
-		public String getUrl() {
-			return url;
-		}
-
-		@JsonProperty("description")
-		public String getDescription() {
-			return description;
-		}
-
-		@JsonProperty("address")
-		public String getAddress() {
-			return address;
-		}
-		
-		@JsonProperty("refrence")
-		public String getRefrence() {
-			return refrence;
+		@JsonProperty("applications")
+		private List<Map<String, Object>>  applications;
+		@JsonProperty("applications")
+		public List<Map<String, Object>>  getApplications() {
+			return applications;
 		}
 	}
 	
@@ -72,32 +62,11 @@ public class Response {
 	 * AWS lambda uses a JSON serialiser that doesn't like the @JsonRawValue tag. 
 	 * So we need to pull the valid json out of raw format -_-
 	 */
-	public Response setGeometry(String geometry) throws JsonParseException, JsonMappingException, IOException {
+	private Map<String, Object> deserialise(String json) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
-        this.geometry =  mapper.readValue(geometry, 
+        return mapper.readValue(json, 
         		MapType.construct(HashMap.class, 
         				SimpleType.construct(String.class),
         				SimpleType.construct(Object.class)));
-		return this;
-	}
-	
-	public Response setUrl(String url) {
-		this.prop.url = url;
-		return this;
-	}
-	
-	public Response setDescription(String description) {
-		this.prop.description = description;
-		return this;
-	}
-
-	public Response setAddress(String address) {
-		this.prop.address = address;
-		return this;
-	}
-
-	public Response setRefrence(String refrence) {
-		this.prop.refrence = refrence;
-		return this;
 	}
 }

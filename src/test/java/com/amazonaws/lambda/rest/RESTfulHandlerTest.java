@@ -22,8 +22,8 @@ public class RESTfulHandlerTest {
     @BeforeClass
     public static void createInput() throws IOException {
         input = new Request();
-        input.setLatitude(-1.1423298);
-        input.setLongitude(52.9510015);
+        input.setLatitude(52.938364199999995);
+        input.setLongitude(-1.1803871);
         input.setRadius(1.0);
     }
 
@@ -41,7 +41,7 @@ public class RESTfulHandlerTest {
         RESTfulHandler handler = new RESTfulHandler();
         Context ctx = createContext();
         ObjectMapper mapper = new ObjectMapper();
-//        String output = mapper.writeValueAsString(handler.handleRequest(input, ctx));
-//        System.out.println(output);
+        String output = mapper.writeValueAsString(handler.handleRequest(input, ctx));
+        System.out.println(output);
     }
 }
