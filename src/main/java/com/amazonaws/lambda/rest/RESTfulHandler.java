@@ -24,7 +24,8 @@ public class RESTfulHandler implements RequestHandler<Request, List<Response>> {
 	private static String port = System.getenv("BOTL_DATABASE_PORT");
 	final static String QUERY = "SELECT CONCAT('[', GROUP_CONCAT(CONCAT( '{\"Reference\": \"', "
 			+ "app.Refrence, '\", \"Description\": \"', app.Description, '\", \"URL\": \"', app.URL, "
-			+ "'\", \"Comments\": ', COALESCE( ( SELECT CONCAT('[', GROUP_CONCAT(CONCAT('{\"Name\": \"', "
+			+ "'\", \"ID\": ', app.ApplicationID, "
+			+ "', \"Comments\": ', COALESCE( ( SELECT CONCAT('[', GROUP_CONCAT(CONCAT('{\"Name\": \"', "
 			+ "comm.Name, '\", \"Comment\": \"', comm.Comment, '\"}') SEPARATOR ', '), ']') FROM "
 			+ "comments comm WHERE comm.ApplicationFK = app.ApplicationID ) , 'null'), '}' ) "
 			+ "SEPARATOR ', '), ']' ) as Applications, ST_AsGeoJSON(app.Geometry) "
@@ -43,7 +44,9 @@ public class RESTfulHandler implements RequestHandler<Request, List<Response>> {
 								app.Description, 
 								'", "URL": "', 
 								app.URL, 
-								'", "Comments": ', 
+								'", "ID": ', 
+								app.ApplicationID, 
+								', "Comments": ', 
 								COALESCE(
 									(
 										SELECT CONCAT('[', GROUP_CONCAT(CONCAT('{"Name": "', comm.Name, '", "Comment": "', comm.Comment, '"}') SEPARATOR ', '), ']')
